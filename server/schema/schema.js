@@ -47,12 +47,12 @@ const BookType = new GraphQLObjectType({
     genre: { type: GraphQLString },
     author: {
       type: AuthorType,
-      // resolve(parent, args) {
-      //   //  console.log(parent)
-      //   // parent is equal to the result of the initial request
-      //   // this is how you model your join relationships with graphql
-      //   return _.find(authors, { id: parent.authorId }); // lodash syntax
-      // },
+      resolve(parent, args) {
+        //  console.log(parent)
+        // parent is equal to the result of the initial request
+        // this is how you model your join relationships with graphql
+        // return _.find(authors, { id: parent.authorId }); // lodash syntax - resolving our data locally from dummy data arrays
+      },
     },
   }),
 });
@@ -67,9 +67,9 @@ const AuthorType = new GraphQLObjectType({
       // definition of the nested relationship between author and thier book(s)
       // type: BookType // this does not work here because author can be related to many books not just a single book
       type: new GraphQLList(BookType),
-      // resolve(parent, args) {
-      //   return _.filter(books, { authorId: parent.id });
-      // },
+      resolve(parent, args) {
+        //   return _.filter(books, { authorId: parent.id });
+      },
     },
   }),
 });
@@ -86,21 +86,21 @@ const RootQuery = new GraphQLObjectType({
       // define the arguements that the front end needs to pass along with this root request
       // args: { id: { type: GraphQLString } }, // args object that will be passed into the resolve function
       args: { id: { type: GraphQLID } },
-      // resolve(parent, args) {
-      //   // resolve function is to get data from db / other source
-      //   // the function fires when a request to this "book" query is received
-      //   // args param gives us access to any args passed in by the user e.g args.id
-      //   return _.find(books, { id: args.id }); // using lodash and a mock array data array as a mock db
-      // },
+      resolve(parent, args) {
+        // resolve function is to get data from db / other source
+        // the function fires when a request to this "book" query is received
+        // args param gives us access to any args passed in by the user e.g args.id
+        //   return _.find(books, { id: args.id }); // using lodash and a mock array data array as a mock db
+      },
     },
 
     // query for a particlular author
     author: {
       type: AuthorType,
       args: { id: { type: GraphQLID } },
-      // resolve(parent, args) {
-      //   return _.find(authors, { id: args.id });
-      // },
+      resolve(parent, args) {
+        //   return _.find(authors, { id: args.id });
+      },
     },
 
     // query for a list of books
@@ -114,9 +114,9 @@ const RootQuery = new GraphQLObjectType({
     // query for a list of authors
     authors: {
       type: GraphQLList(AuthorType),
-      // resolve(parent, args) {
-      //   return authors;
-      // },
+      resolve(parent, args) {
+        //   return authors;
+      },
     },
   },
 });
