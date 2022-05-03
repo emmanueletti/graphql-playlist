@@ -8,6 +8,8 @@ const {
   GraphQLList,
 } = graphql;
 const _ = require('lodash');
+
+// Akin to Rails ActiveRecord model
 const Book = require('../models/book');
 const Author = require('../models/author');
 
@@ -121,6 +123,31 @@ const RootQuery = new GraphQLObjectType({
   },
 });
 
+// All the different mutations we want to make to the db
+const Mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    addAuthor: {
+      type: AuthorType,
+      // if front end user wants to add an author to the db, we expect them to send
+      // along some args
+      args: {
+        name: { type: GraphQLString },
+        age: { type: GraphQLInt },
+      },
+      resolve(parent, args) {
+        // Author mongoose model imported from models folder
+        // Super Rails-y pattern
+        let author = new Author({ ...args });
+        return author.save();
+      },
+    },
+  },
+});
+
 module.exports = new GraphQLSchema({
+  // front end user can make queries using this rootquery
   query: RootQuery,
+  // and can make mutations using this mutation
+  mutation: Mutation,
 });
