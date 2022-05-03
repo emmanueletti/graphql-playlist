@@ -5,7 +5,7 @@ const schema = require('./schema/schema');
 const mongoose = require('mongoose'); // mongoose is an ORM a là Rails ActiveRecord
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // connect to mongoDb
 mongoose.connect(
@@ -18,7 +18,7 @@ mongoose.connection.once('open', () => {
 
 // graphql is set up as an express middleware with an endpoint that acts as a supercharged entry
 // point for all graph ql requests
-app.use('/graphql', graphqlHTTP({ schema, graphiql: true }));
+app.use('/graphql', graphqlHTTP({ schema, graphiql: false }));
 
 app.listen(PORT, () => {
   console.log(`Server listing on port ${PORT}`);
