@@ -2,9 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
 const schema = require('./schema/schema');
+const cors = require('cors');
 const mongoose = require('mongoose'); // mongoose is an ORM a là Rails ActiveRecord
 
 const app = express();
+app.use(cors());
+
 const PORT = process.env.PORT || 3000;
 
 // connect to mongoDb
