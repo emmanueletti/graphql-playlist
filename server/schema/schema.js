@@ -6,6 +6,7 @@ const {
   GraphQLID,
   GraphQLInt,
   GraphQLList,
+  GraphQLNonNull,
 } = graphql;
 const _ = require('lodash');
 
@@ -50,10 +51,12 @@ const BookType = new GraphQLObjectType({
     author: {
       type: AuthorType,
       resolve(parent, args) {
-        //  console.log(parent)
-        // parent is equal to the result of the initial request
+        // console.log(parent)
+        // parent is equal to the result of the initial request in which the author is not nested in
         // this is how you model your join relationships with graphql
         // return _.find(authors, { id: parent.authorId }); // lodash syntax - resolving our data locally from dummy data arrays
+
+        return Author.findById(parent.authorId);
       },
     },
   }),
@@ -71,6 +74,9 @@ const AuthorType = new GraphQLObjectType({
       type: new GraphQLList(BookType),
       resolve(parent, args) {
         //   return _.filter(books, { authorId: parent.id });
+
+        // mongoose ORM find all books that match the passed the criteria
+        return Book.find({ authorId: parent.id });
       },
     },
   }),
@@ -93,6 +99,8 @@ const RootQuery = new GraphQLObjectType({
         // the function fires when a request to this "book" query is received
         // args param gives us access to any args passed in by the user e.g args.id
         //   return _.find(books, { id: args.id }); // using lodash and a mock array data array as a mock db
+
+        return Book.findById(args.id);
       },
     },
 
@@ -102,15 +110,21 @@ const RootQuery = new GraphQLObjectType({
       args: { id: { type: GraphQLID } },
       resolve(parent, args) {
         //   return _.find(authors, { id: args.id });
+
+        return Author.findById(args.id);
       },
     },
 
     // query for a list of books
     books: {
       type: GraphQLList(BookType),
-      // resolve(parent, args) {
-      //   return books;
-      // },
+      resolve(parent, args) {
+        // return books;
+
+        // Mongoose ORM find method used without passing any criteria in the criteria
+        // object will just return everything
+        return Book.find({});
+      },
     },
 
     // query for a list of authors
@@ -118,6 +132,8 @@ const RootQuery = new GraphQLObjectType({
       type: GraphQLList(AuthorType),
       resolve(parent, args) {
         //   return authors;
+
+        return Author.find({});
       },
     },
   },
@@ -132,14 +148,27 @@ const Mutation = new GraphQLObjectType({
       // if front end user wants to add an author to the db, we expect them to send
       // along some args
       args: {
-        name: { type: GraphQLString },
-        age: { type: GraphQLInt },
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        age: { type: new GraphQLNonNull(GraphQLInt) },
       },
       resolve(parent, args) {
         // Author mongoose model imported from models folder
         // Super Rails-y pattern
         let author = new Author({ ...args });
         return author.save();
+      },
+    },
+
+    addBook: {
+      type: BookType,
+      args: {
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        genre: { type: new GraphQLNonNull(GraphQLString) },
+        authorId: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve(parent, args) {
+        let book = new Book({ ...args });
+        return book.save();
       },
     },
   },
